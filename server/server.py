@@ -1,9 +1,11 @@
+import service
 from time import sleep
 
 
 class Server():
     def __init__(self):
         self.clients = {}
+        service.start_cervices()
 
     def listen(self, port):
         print('Server started on port <{}>'.format(port))

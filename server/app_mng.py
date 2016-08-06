@@ -26,46 +26,53 @@ class AppManager:
         except TypeError:
             return 'invalid arguments number'
 
-    def sys_call(self, command, args):
-        if command == 'start':
-            app_name = args[0]
-            try:
-                app = __import__('apps.'+app_name, fromlist=('apps',))
-                self.app_counter += 1
-                self.apps[self.app_counter] = getattr(app, app_name.capitalize())()
-                return self.app_counter
-            except (ImportError, AttributeError):
-                return 'bad app_name: {}'.format(app_name)
-        elif command == 'stop':
-            try:
-                pid = int(args[0])
-                if pid == 1:
-                    return "you can't stop the system"
-                app = self.apps[pid]
-                app.stop()
-                del self.apps[pid]
-            except KeyError:
-                return 'this app is not running!'
-        elif command == 'connect':
-            args = [int(arg) for arg in args]
-
-            friend_uid, pid, permission = args
-
-            friend = server.clients.get(friend_uid, None)
-            if friend is None:
-                return
-
-            app = friend.app_mng.apps.get(pid, None)
-            if app is None:
-                return
-
-            print(app)
-
-            allowed = app.is_allowed_to_connect(permission)
-            if not allowed:
-                return
-
+    def sys_call_start(self, args):
+        app_name = args[0]
+        try:
+            app = __import__('apps.'+app_name, fromlist=('apps',))
             self.app_counter += 1
-            self.apps[self.app_counter] = app
-            print('connected')
+            self.apps[self.app_counter] = getattr(app, app_name.capitalize())()
+            return self.app_counter
+        except (ImportError, AttributeError):
+            return 'bad app_name: {}'.format(app_name)
+
+
+    def sys_call_stop(self, args):
+        try:
+            pid = int(args[0])
+            if pid == 1:
+                return "you can't stop the system"
+            app = self.apps[pid]
+            app.stop()
+            del self.apps[pid]
+        except KeyError:
+            return 'this app is not running!'
+
+    def sys_call_connect(self, args):
+        args = [int(arg) for arg in args]
+
+        friend_uid, pid, permission = args
+        friend = server.clients.get(friend_uid, None)
+        if friend is None:
+            return
+        app = friend.app_mng.apps.get(pid, None)
+        if app is None:
+            return
+        self.app_counter += 1
+        self.apps[self.app_counter] = app
+        print('connected')
+
+    def sys_call_disconnect(self, args):
+        try:
+            pid = int(args[0])
+            if pid == 1:
+                return "you can't stop the system"
+            app = self.apps[pid]
+            app.disconnect()
+        except KeyError:
+            return 'this app is not running!'
+
+    def sys_call(self, command, args):
+        return getattr(self, 'sys_call_'+command)(args)
+
 

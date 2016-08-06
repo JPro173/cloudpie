@@ -12,7 +12,7 @@ from connection import Connection
 class FakeClient:
     def __init__(self, uid):
         self.uid = uid
-        self.app_mng = AppManager()
+        self.app_mng = AppManager(uid)
         self.connection = Connection(self.recv)
         server.connect(self)
         threading.Thread(target=self.loop, daemon=True).start()
