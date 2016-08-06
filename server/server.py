@@ -1,16 +1,29 @@
 import service
-from time import sleep
+import socket
+from threading import Thread
 
 
-class Server():
+HOST = 'localhost'
+PORT = 8000
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.bind((HOST, PORT))
+sock.listen(5)
+
+class Server:
     def __init__(self):
         self.clients = {}
         service.start_cervices()
 
-    def listen(self, port):
+    def listen(self, port, ClientClass):
         print('Server started on port <{}>'.format(port))
         try:
-            sleep(10000)
+            while True:
+                conn, addr = sock.accept()
+                client = ClientClass(conn, addr)
+                th = Thread(target=client.loop)
+                th.daemon = True
+                th.start()
         except KeyboardInterrupt:
             print('Server stopped')
             pass

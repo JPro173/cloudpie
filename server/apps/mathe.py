@@ -23,3 +23,6 @@ class MatheService:
     def protected_sum(self, lst, uid):
         return sum(lst)
 
+    def protected_join(self, lst, st, uid):
+        return st.join([str(l) for l in lst])
+
