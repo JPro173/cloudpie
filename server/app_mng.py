@@ -1,4 +1,5 @@
 import apps.system
+import login
 
 from server import server
 
@@ -34,8 +35,9 @@ class AppManager:
         login = args[0]
         password = args[1]
 
-        if login.is_ok(login, password):
-
+        if login.login(login, password):
+            return 'ok'
+        return 'fail'
 
     def sys_call_start(self, args):
         app_name = args[0]

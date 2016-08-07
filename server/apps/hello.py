@@ -1,6 +1,5 @@
-from service import services
 from collections import defaultdict
-from apps import BaseApp
+from apps import BaseApp, get_service
 
 class Hello(BaseApp):
     def __init__(self, uid):
@@ -23,7 +22,7 @@ class Hello(BaseApp):
         return self.a
 
     def history(self, uid):
-        return services['mathe'].protected_join(self.clients[uid], ' ', uid)
+        return get_service('mathe').join(self.clients[uid], ' ')
 
     def is_allowed_to_connect(self, permission):
         return True
