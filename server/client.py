@@ -8,16 +8,18 @@ class Client:
         self.__conn = conn
         self.addr = addr
         self.uid = str(uuid.uuid4())
-        self.app_mng = AppManager(self.uid)
+        self.app_mng = AppManager(self)
+        self.login = ''
+        self.logged_in = False
 
     def send(self, msg):
-        self.__conn.send(str(msg))
+        self.__conn.send(bytes(str(msg), 'utf-8'))
 
     def recv(self):
         return self.__conn.recv(1024)
 
     def process_data(self, data):
-        data = shlex.split(data)
+        data = shlex.split(str(data, 'utf-8'))
 
         pid = int(data[0])
         command = data[1]

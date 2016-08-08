@@ -4,11 +4,9 @@ from threading import Thread
 
 
 HOST = 'localhost'
-PORT = 8000
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.bind((HOST, PORT))
-sock.listen(5)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 class Server:
     def __init__(self):
@@ -16,6 +14,8 @@ class Server:
         service.start_cervices()
 
     def listen(self, port, ClientClass):
+        sock.bind((HOST, port))
+        sock.listen(5)
         print('Server started on port <{}>'.format(port))
         try:
             while True:
@@ -25,6 +25,7 @@ class Server:
                 th.daemon = True
                 th.start()
         except KeyboardInterrupt:
+            sock.close()
             print('Server stopped')
             pass
 

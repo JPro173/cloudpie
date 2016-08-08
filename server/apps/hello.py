@@ -1,7 +1,8 @@
+import msg
 from collections import defaultdict
-from apps import BaseApp, get_service
+from service import services
 
-class Hello(BaseApp):
+class Hello:
     def __init__(self, uid):
         self.admin_uid = uid
         self.clients = defaultdict(list)
@@ -16,13 +17,16 @@ class Hello(BaseApp):
     def connect(self, uid):
         self.clients[uid] = []
 
-    def go(self, n, uid):
-        self.clients[uid].append(int(n))
-        self.a += int(n)
-        return self.a
+    def public_go(self, n, uid):
+        try:
+            self.clients[uid].append(int(n))
+            self.a += int(n)
+            return msg.message(self.a)
+        except:
+            return msg.cast_error(0, int)
 
-    def history(self, uid):
-        return get_service('mathe').join(self.clients[uid], ' ')
+    def public_history(self, uid):
+        return msg.message(services.mathe.join(self.clients[uid], ' '))
 
     def is_allowed_to_connect(self, permission):
         return True
