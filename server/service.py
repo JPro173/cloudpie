@@ -7,7 +7,7 @@ class ServiceInterface:
         self.service = service
 
     def __getattr__(self, attr_name):
-        attr_name = 'protected_' + attr_name
+        attr_name = 'p_' + attr_name
         if hasattr(self.service, attr_name):
             return getattr(self.service, attr_name)
 
@@ -16,6 +16,7 @@ class Services(UserDict):
     def __getattr__(self, name):
         return self.data[name]
     def __setitem__(self, name, item):
+        print(item)
         self.data[name] = ServiceInterface(item)
 
 services = Services()

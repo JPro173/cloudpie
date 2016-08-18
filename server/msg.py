@@ -1,4 +1,5 @@
 import json
+import pprint
 
 def error(msg):
     return json.dumps({'status': 'error', 'message': msg})
@@ -18,11 +19,15 @@ def args_count_error(got, expected=-1):
 def need_login_error():
     return error('You need to log in')
 
-def dont_exist_error(**kwargs):
-    return error('{} {} does not exists!'.format(*kwargs.items()[0]))
+def dont_exists_error(**kwargs):
+    return error('{} {} does not exists!'.format(*list(kwargs.items())[0]))
 
 def message(*msg, delim=' '):
     return json.dumps({'status': 'ok', 'message': delim.join([str(m) for m in msg])})
+
+
+def preaty(data):
+    return json.dumps({'status': 'ok', 'message': pprint.pformat(data)})
 
 def ok():
     return json.dumps({'status': 'ok'})

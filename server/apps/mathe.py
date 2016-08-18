@@ -1,5 +1,5 @@
 class Mathe:
-    def __init__(self):
+    def __init__(self, root_uid):
         self.clients = {}
         self.a = 0
 
@@ -20,9 +20,9 @@ class MatheService:
     def __init__(self):
         pass
 
-    def protected_sum(self, lst):
+    def p_sum(self, lst):
         return sum(lst)
 
-    def protected_join(self, lst, st):
+    def p_join(self, lst, st):
         return st.join([str(l) for l in lst])
 
