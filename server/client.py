@@ -40,11 +40,29 @@ class Client:
             pid = int(data[0])
             command = data[1]
             args = data[2:]
-            result = self.app_mng.call(pid, command, args)
+            result = self.call_func(pid, command, args)
             self.send(result)
         except:
             raise
             self.send(msg.fail())
+
+    def call_func(self, pid, command, args):
+        if (pid != 0 or command != 'login') and not self.logged_in:
+            return msg.need_login_error()
+
+        app = self.get(pid, None)
+        if app is None:
+            return msg.dont_exists_error(program=pid)
+
+        func = getattr(app, 'p_'+command, None)
+        if func is None:
+            return msg.dont_exists_error(command=command)
+        try:
+            args.append(self.user.uid)
+            return func(*args)
+        except TypeError:
+            raise
+            return msg.args_count_error(got=len(args)-1)
 
     def loop(self):
         print("client {} connected".format(self.addr))

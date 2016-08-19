@@ -11,10 +11,6 @@ class AppManager:
 
 
     def call(self, app_pid, command, args):
-        app_pid = int(app_pid)
-        if app_pid == 0:
-            return self.sys_call(command, args)
-
         if not self.user.logged_in:
             return msg.need_login_error()
 
