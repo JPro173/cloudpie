@@ -3,66 +3,62 @@ from service import services
 
 
 class System:
-    def p_notifications(self, args):
-        return msg.preaty(list(self.user.notifications.read()))
+    def p_notifications(self, user):
+        return msg.preaty(list(user.notifications.read()))
 
-    def p_orders(self, args):
-        return msg.preaty(self.user.orders)
+    def p_orders(self, user):
+        return msg.preaty(user.orders)
 
-    def p_accept(self, args):
-        oid = args[0]
-        order = self.user.orders.get(oid)
+    def p_accept(self, oid, user):
+        order = user.orders.get(oid)
         if order is None:
             return msg.dont_exists_error(order_id=oid)
-        if not self.apps[order.pid].is_allowed_to_connect(order.perm):
+        if not user.apps[order.pid].is_allowed_to_connect(order.perm):
             return msg.ok()
         uid_conn = order.uid
         uapp = services.users.get(uid_conn).app_mng
         uapp.app_counter += 1
-        uapp.apps[uapp.app_counter] = self.apps[order.pid]
-        self.apps[order.pid].connect(uid_conn)
+        uapp.apps[uapp.app_counter] = user.apps[order.pid]
+        user.apps[order.pid].connect(uid_conn)
         return msg.ok()
 
-    def p_login(self, args):
+    def p_login(self, username, password, user):
         try:
-            username = args[0]
-            password = args[1]
             if services.drive.checkcreds(username, password):
-                self.user.logged_in = True
-                self.user.username = username
+                user.logged_in = True
+                user.username = username
                 return msg.ok()
         except:
             return msg.fail()
         return msg.fail()
 
-    def p_start(self, args):
+    def p_start(self, app_name, user):
         try:
-            app_name = args[0]
             app = __import__('apps.'+app_name, fromlist=('apps',))
-            self.app_counter += 1
-            self.apps[self.app_counter] = getattr(app, app_name.capitalize())(self.user.uid)
-            return msg.message('Program started with pid', self.app_counter)
+            user.app_counter += 1
+            user.apps[user.app_counter] = getattr(app, app_name.capitalize())(user)
+            return msg.message('Program started with pid', user.app_counter)
         except (ImportError, AttributeError):
             return msg.dont_exists_error(program=app_name)
 
 
-    def p_stop(self, args):
+    def p_stop(self, pid, user):
         try:
-            pid = int(args[0])
-            if pid == 1:
+            pid = int(pid)
+            if pid <= 0:
                 return msg.error('Can\'t stop system program. Use logout.')
-            app = self.apps[pid]
+            app = user.apps[pid]
             app.stop()
-            del self.apps[pid]
+            del user.apps[pid]
         except KeyError:
             return msg.dont_exists_error(program=pid)
 
-    def p_disconnect(self, args):
+    def p_disconnect(self, pid, user):
         try:
-            pid = int(args[0])
-            if pid <= 1:
+            pid = int(pid)
+            if pid <= 0:
                 return msg.error('Can\'t stop system program. Use logout.')
-            app = self.apps[pid]
+            app = user.apps[pid]
             app.disconnect()
         except KeyError:
             return msg.dont_exists_error(program=pid)

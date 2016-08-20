@@ -1,9 +1,9 @@
 import shlex
 import msg
 import uuid
+import apps
 
 from service import services
-from app_mng import AppManager
 from notification import NotificationManager
 
 
@@ -12,7 +12,8 @@ class Client:
         self.__conn = conn
         self.addr = addr
         self.uid = str(uuid.uuid4())
-        self.app_mng = AppManager(self)
+        self.apps = {0: apps.system.System()}
+        self.app_counter = 0
         self.orders = {}
         self.username = ''
         self.logged_in = False
@@ -58,7 +59,7 @@ class Client:
         if func is None:
             return msg.dont_exists_error(command=command)
         try:
-            args.append(self.user.uid)
+            args.append(self)
             return func(*args)
         except TypeError:
             raise
