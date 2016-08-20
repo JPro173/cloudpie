@@ -7,10 +7,10 @@ from collections import namedtuple
 
 
 class Chat:
-    def __init__(self, root_uid):
-        self.root_uid = root_uid
+    def __init__(self, root_user):
+        self.root_user = root_user
         self.a = 0
-        self.login = services.users.get(root_uid).username
+        self.login = root_user.username
         self.active_chat = None
         services.chat.init(self.login)
 
@@ -23,12 +23,10 @@ class Chat:
     def connect(self, uid):
         pass
 
-    def p_pchat(self, login, _):
+    def p_new(self, login, _):
         try:
-            user = services.users.get(self.root_uid)
-            chat = services.chat.create([user.username, login])
-            self.chat = chat
-            return msg.ok()
+            chat_id = services.chat.create([self.login, login])
+            return msg.message(chat_id)
         except:
             return msg.fail()
 
@@ -38,15 +36,15 @@ class Chat:
             return msg.fail()
         return msg.preaty(chats)
 
-    def p_choose_chat(self, chat_id, _):
+    def p_load(self, chat_id, _):
         chat = services.chat.load_chat(self.login, chat_id)
         if chat == None:
             return msg.fail()
         self.chat = chat
         return msg.ok()
 
-    def p_msg(self, message, _):
-        self.active_chat.send(self.login, message)
+    def p_msg(self, chat_id, message, _):
+        services.chat.send(self.login, chat_id, message)
         return msg.ok()
 
     def p_unread(self, _):
@@ -58,7 +56,7 @@ class Chat:
 
 
 class ChatService:
-    def p_load_chat(self, login ,chat_id):
+    def p_load(self, login ,chat_id):
         admin_login, chat_name = chat_id.split('|')
         chat_data = services.drive.read(admin_login, '/appdata/chat/chats/{}'.format(chat_id))
         chat = ChatInst.from_json(chat_data)
@@ -66,24 +64,15 @@ class ChatService:
             return
         return chat
 
-    def p_create(self, logins):
-        admin_login = logins[0]
-        chat_name = str(uuid.uuid4())
+    def p_new(self, logins):
+        chat_id = str(uuid.uuid4())
         chat = ChatInst(logins)
         json_data = chat.json()
-        services.drive.write(admin_login, '/appdata/chat/chats/{}'.format(chat_name), data=json_data)
-        chat_id = '{}|{}'.format(admin_login, chat_name)
-        services.drive.append(admin_login, '/appdata/chat/chatlist', chat_id+'\n')
+        services.drive.shared.write('chat', '/appdata/chat/chats/{}'.format(chat_id), data=json_data)
         return chat
 
     def p_chatlist(self, login):
         return services.drive.read(login, '/appdata/chat/chatlist').split('\n')
-
-    def p_init(self, login):
-        if not services.drive.exists(login, '/appdata/chat/'):
-            services.drive.mkdir(login, '/appdata/chat/chats/')
-            services.drive.write(login, '/appdata/chat/chatlist', '')
-
 
 
 class ChatInst:
@@ -127,14 +116,3 @@ def message_from_json(json_data):
     data = json.loads(json_data)
     return Message(**data)
 
-class Client:
-    def __init__(self, uid):
-        self.uid = uid
-        self.active_chat = None
-
-    def send(self, msg):
-        if self.active_chat == None:
-            return False
-
-
-        return True

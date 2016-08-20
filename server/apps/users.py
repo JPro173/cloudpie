@@ -5,12 +5,12 @@ from service import services
 
 
 class Users:
-    def __init__(self, root_uid):
-        self.root_uid = root_uid
+    def __init__(self, root_user):
+        self.root_user = root_user
 
     def p_find(self, username, _):
         try:
-            result = services.users.find(username, self.root_uid)
+            result = services.users.find(username, self.root_user)
             return msg.preaty(result)
         except Exception as es:
             print(str(es))
@@ -36,23 +36,23 @@ class UsersService:
     def p_get(self, uid):
         return users.get(uid)
 
-    def p_connect(self, uid, pid, perm, self_uid):
+    def p_connect(self, uid, pid, perm, user):
         #users.get(uid).notify(conn={"uid": self_uid, "pid": pid, "perm": perm})
         oid = str(uuid.uuid4())
         users.get(uid).orders[oid] = order.new(
-            uid=self_uid,
+            uid=user.uid,
             pid=int(pid),
             perm=perm
         )
 
-    def p_find(self, username, self_uid):
+    def p_find(self, username, user):
         result = set()
-        for user in users.values():
-            if user.username == username:
-                result.add(user.uid)
+        for usr in users.values():
+            if usr.username == username:
+                result.add(usr.uid)
 
         for uid in result.copy():
-            if uid == self_uid:
+            if uid == user.uid:
                 result.remove(uid)
 
         return result
