@@ -28,6 +28,8 @@ def start_cervices():
     for app_name in __filter_apps(os.listdir('./apps')):
         app_name = app_name[:-3]
         app = __import__('apps.'+app_name, fromlist=('apps',))
-        service = getattr(app, app_name.capitalize()+'Service')()
-        services[app_name] = service
+        service_name = app_name.capitalize()+'Service'
+        if hasattr(app, service_name):
+            service = getattr(app, service_name)()
+            services[app_name] = service
 

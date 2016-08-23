@@ -25,4 +25,4 @@ class Notification:
         self.save = False
 
     def __repr__(self):
-        return json.dumps({"category": self.category, "message": self.message})
+        return json.dumps({"category": self.category, "notification": self.message})

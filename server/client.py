@@ -1,8 +1,8 @@
 import shlex
 import msg
 import uuid
-import apps
 
+from apps import system
 from service import services
 from notification import NotificationManager
 
@@ -12,7 +12,7 @@ class Client:
         self.__conn = conn
         self.addr = addr
         self.uid = str(uuid.uuid4())
-        self.apps = {0: apps.system.System()}
+        self.apps = {0: system.System()}
         self.app_counter = 0
         self.orders = {}
         self.username = ''
@@ -51,7 +51,7 @@ class Client:
         if (pid != 0 or command != 'login') and not self.logged_in:
             return msg.need_login_error()
 
-        app = self.get(pid, None)
+        app = self.apps.get(pid, None)
         if app is None:
             return msg.dont_exists_error(program=pid)
 

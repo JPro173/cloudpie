@@ -10,21 +10,6 @@ class DriveError(Exception):
     pass
 
 
-class SharedDrive:
-    def __init__(self):
-        pass
-
-    def ppath(self, appname, path, check_exists=True):
-        if path[0] == '/':
-            path = path[1:]
-        path = os.path.join('./drive/shared/{}'.format(appname), path)
-        path = os.path.normpath(path)
-        path = os.path.abspath(path)
-        if check_exists and not os.path.exists(path):
-            raise PathError(path)
-        return path
-
-
 class DriveService:
     def __init__(self):
         self.p_shared = SharedDrive()
@@ -69,4 +54,23 @@ class DriveService:
             return self.p_read(username, path).split('\n')[line]
         except IndexError:
             raise DriveError('No line in file {} with number {}'.format(path, line))
+
+
+class SharedDrive(DriveService):
+    def __init__(self):
+        pass
+
+    def ppath(self, appname, path, check_exists=True):
+        if path[0] == '/':
+            path = path[1:]
+        path = os.path.join('./drive/shared/{}'.format(appname), path)
+        path = os.path.normpath(path)
+        path = os.path.abspath(path)
+        if check_exists and not os.path.exists(path):
+            raise PathError(path)
+        return path
+
+    def __getattr__(self, name):
+        return getattr(self, 'p_'+name)
+
 

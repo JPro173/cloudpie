@@ -16,10 +16,12 @@ class System:
         if not user.apps[order.pid].is_allowed_to_connect(order.perm):
             return msg.ok()
         uid_conn = order.uid
-        uapp = services.users.get(uid_conn).app_mng
+        uapp = services.users.get(uid_conn)
         uapp.app_counter += 1
         uapp.apps[uapp.app_counter] = user.apps[order.pid]
-        user.apps[order.pid].connect(uid_conn)
+        app = user.apps[order.pid]
+        if hasattr(app, 'connect'):
+                app.connect(uid_conn)
         return msg.ok()
 
     def p_login(self, username, password, user):
@@ -48,7 +50,10 @@ class System:
             if pid <= 0:
                 return msg.error('Can\'t stop system program. Use logout.')
             app = user.apps[pid]
-            app.stop()
+
+            if hasattr(app, 'stop'):
+                app.stop()
+
             del user.apps[pid]
         except KeyError:
             return msg.dont_exists_error(program=pid)
