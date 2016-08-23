@@ -22,7 +22,6 @@ class Client:
         on_start = '''0 login user00 qqq
         0 start users
         0 start hello'''
-        #2 find user00'''
         for line in on_start.split('\n'):
             self.process_data(bytes(line, 'utf-8'))
 
