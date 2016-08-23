@@ -48,7 +48,7 @@ class Client:
 
     def call_func(self, pid, command, args):
         if (pid != 0 or command != 'login') and not self.logged_in:
-            return msg.need_login_error()
+            return msg.error('You need to log in')
 
         app = self.apps.get(pid, None)
         if app is None:

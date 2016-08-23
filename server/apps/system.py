@@ -32,6 +32,7 @@ class System:
                 return msg.ok()
         except:
             return msg.fail()
+        print('faile')
         return msg.fail()
 
     def p_start(self, app_name, user):

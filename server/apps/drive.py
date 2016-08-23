@@ -50,7 +50,7 @@ class DriveService:
         return os.path.exists(self.ppath(path, check_exists=False))
 
     def p_checkcreds(self, username, password):
-        real_hash_password = self.p_readline('./{}/passwd'.format(username))
+        real_hash_password = self.p_readline('./{}/sys/passwd'.format(username))
         hash_password = hashlib.md5(password.encode('utf-8')).hexdigest()
         return hmac.compare_digest(hash_password, real_hash_password)
 
