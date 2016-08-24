@@ -22,7 +22,7 @@ class Services(UserDict):
 services = Services()
 
 def __filter_apps(files):
-    return [f for f in files if f.endswith('py') and f != 'system.py' and f[0] != '_']
+    return sorted([f for f in files if f.endswith('py') and f != 'system.py' and f[0] != '_'], key=lambda x: x != 'drive.py')
 
 def start_cervices():
     for app_name in __filter_apps(os.listdir('./apps')):

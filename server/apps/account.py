@@ -7,9 +7,6 @@ class Account:
     def __init__(self, root_user):
         self.root_user = root_user
 
-    def p_invite(self, username, pid, perm):
-        services.account.get(username).invite(pid, perm)
-
 accounts = {}
 
 class AccountInstance:
@@ -17,10 +14,11 @@ class AccountInstance:
         self.drive = services.drive.bake('/{}/'.format(login))
         self.login = login
 
-    def invite(self, username, pid, perm):
-        uid = str(uuid.uuid4())
-        self.drive.appendj('sys/invitations', {'uid': uid, 'username': username, 'pid': pid, 'perm': perm})
-        return msg.ok()
+    def invite(self, invitation):
+        self.drive.appendj('sys/invitations', invitation)
+
+    def notify(self, notification):
+        self.drive.appendj('sys/notifications', notification)
 
 class AccountService:
     def __init__(self):

@@ -29,9 +29,9 @@ class DriveService:
     def p_bake(self, path_prefix='', path_postfix=''):
         return BakedDrive(self, path_prefix, path_postfix)
 
-    def p_read(self, path, bytes_=False):
+    def p_read(self, path, bytes_=0):
         try:
-            return open(self.ppath(path), 'r'+'b'*bytes_).read()
+            return open(self.ppath(path), 'r').read()
         except PathError:
             data = b'' if bytes_ else ''
             self.p_write(path, data, bytes_)
@@ -68,11 +68,13 @@ class DriveService:
             open(self.ppath(path))
         )
         return data
+
     def p_writej(self, path, data):
         return json.dump(
-            open(self.ppath(path), 'w+'),
-            data
+            data,
+            open(self.ppath(path), 'w+')
         )
+
     def p_appendj(self, path, data):
         data_curr = self.p_readj(path)
         if isinstance(data_curr, dict):
@@ -81,7 +83,9 @@ class DriveService:
             data_curr.append(data)
         else:
             raise DriveError('Can\'t append to JSON file {}'.format(path))
-        self.p_writej(self, path, data_curr)
+        self.p_writej(path, data_curr)
+
+
 class SharedDrive(DriveService):
     def __init__(self):
         pass

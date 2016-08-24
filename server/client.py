@@ -16,8 +16,9 @@ class Client:
         self.app_counter = 0
         self.orders = {}
         self.username = ''
+        self.invite_doors = {}
         self.logged_in = False
-        self.notifications = NotificationManager()
+        self.local_notifications = NotificationManager()
         services.users.add(self)
         on_start = '''0 login user00 qqq
         0 start users

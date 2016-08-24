@@ -8,7 +8,6 @@ from service import services
 class Chat:
     def __init__(self, root_user):
         self.root_user = root_user
-        self.a = 0
         self.login = root_user.username
         self.active_chat = None
 
@@ -26,11 +25,11 @@ class Chat:
             return msg.fail()
         return msg.preaty(chats)
 
-    def p_msg(self, chat_id, message, _):
-        services.chat.send(self.login, chat_id, message)
+    def p_send(self, login, message, _):
+        services.chat.send(self.login, login, message)
         return msg.ok()
 
-    def p_messages(self, chat_id, _):
+    def p_messages(self, login, _):
         chat = services.chat.load(self.login, chat_id)
         return msg.preaty(chat.messages)
 
@@ -41,7 +40,7 @@ class Chat:
 
 class ChatService:
     def p_load(self, login ,chat_id):
-        chat_data = services.drive.shared.read('chat', 'chats/{}'.format(chat_id))
+        chat_data = services.drive.shared.read('chat/chats/{}'.format(chat_id))
         chat = ChatInst.from_json(chat_data)
         if not login in chat.logins:
             return
@@ -51,7 +50,7 @@ class ChatService:
         chat_id = str(uuid.uuid4())
         chat = ChatInst(logins)
         json_data = chat.json()
-        services.drive.shared.write('chat', 'chats/{}'.format(chat_id), data=json_data)
+        services.drive.shared.write('chat/chats/{}'.format(chat_id), data=json_data)
         return chat_id
 
     def p_send(self, login, chat_id, message):
@@ -60,7 +59,7 @@ class ChatService:
         services.chat.save(chat_id, chat)
 
     def p_save(self, chat_id, chat):
-        services.drive.shared.write('chat', 'chats/{}'.format(chat_id), data=chat.json())
+        services.drive.shared.write('chat/chats/{}'.format(chat_id), data=chat.json())
 
     def p_messages(self, chat_id):
         chat = services.chat.load(self.login, chat_id)

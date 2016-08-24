@@ -17,6 +17,9 @@ class NotificationManager:
                 result.add(notification)
         return result
 
+    def tolist(self):
+        return self.data
+
 class Notification:
     def __init__(self, category, message):
         self.category = category

@@ -1,13 +1,38 @@
 import msg
+import uuid
 from service import services
 
 
 class System:
     def p_notifications(self, user):
-        return msg.preaty(list(user.notifications.read()))
+        return msg.preaty(services.notfs.all(user))
 
     def p_orders(self, user):
         return msg.preaty(user.orders)
+
+    def p_invite(self, login, pid, perm, user):
+        uid = str(uuid.uuid4())
+        inv = {'id': uid, 'uid': user.uid, 'pid': pid, 'perm': perm}
+        user.invite_doors[uid] = inv
+        services.account.get(login).invite(inv)
+        return msg.ok()
+
+    def p_connect(self, invitation_id, user):
+        invitations = services.account.get(user.username).drive.readj('sys/invitations')
+        invitation = None
+        for invit in invitations:
+            if invit['id'] == invitation_id:
+                invitation = invit
+                break
+        else:
+            return msg.fail()
+
+        app = services.users.get(invitation['uid']).apps[int(invitation['pid'])]
+        if not app.is_allowed_to_connect(invitation['perm']):
+            return msg.fail()
+        user.app_counter += 1
+        user.apps[user.app_counter] = app
+        return msg.message('Program started with pid', user.app_counter)
 
     def p_accept(self, oid, user):
         order = user.orders.get(oid)
@@ -32,7 +57,6 @@ class System:
                 return msg.ok()
         except:
             return msg.fail()
-        print('faile')
         return msg.fail()
 
     def p_start(self, app_name, user):

@@ -27,7 +27,7 @@ def message(*msg, delim=' '):
 
 
 def preaty(data):
-    return json.dumps({'status': 'ok', 'message': pprint.pformat(data)})
+    return json.dumps({'status': 'ok', 'message': pprint.pformat(data).replace('\'', '"')})
 
 def ok():
     return json.dumps({'status': 'ok'})

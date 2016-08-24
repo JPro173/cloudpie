@@ -19,7 +19,8 @@ class FakeClient(Client):
         self.app_counter = 0
         self.orders = {}
         self.logged_in = False
-        self.notifications = NotificationManager()
+        self.invite_doors = {}
+        self.local_notifications = NotificationManager()
         self.scenf = getattr(self, 'scen_{}'.format(self.scen))
         services.users.add(self)
 
@@ -73,27 +74,62 @@ class FakeClient(Client):
         elif step == 4:
             self.go('0 invite user01 1 1')
             self.test(msg.ok())
-        elif step == 10:
+        elif step == 8:
             self.go('1 go 10')
-            self.test(msg.message('9'))
+            self.test(msg.message('20'))
+        elif step == 9:
+            self.go('0 notifications')
+            self.test(
+                json.loads(json.loads(self.result)['message'])[-1]['text'],
+                "Hy you there"
+            )
+        elif step == 10:
+            self.go('0 start chat')
+        elif step == 12:
+            self.go('3 messages')
+            self.test(msg.message([{'login':'user01', 'message':'test_msg1'}]))
+            self.test(msg.message([]))
 
 
     def scen_user01(self, step):
         if step == 0:
             #test success login
-            self.go('0 login {} {}'.format(
-                'user01',
-                'qqq'
-            ))
+            self.go('0 login user01 qqq')
             self.test(msg.ok())
         elif step == 5:
             self.go('0 notifications')
-            invitation_id = json.loads(self.result)[0]['uid']
+            message = json.loads(self.result)['message']
+            invitation_id = json.loads(message)[-1]['id']
             self.go('0 connect {}'.format(invitation_id))
+            self.test(type(self.apps[1]).__name__, 'Hello')
             self.test(msg.message('Program started with pid', 1))
-
-
+        elif step == 6:
+            self.go('1 go 3')
+            self.test(msg.message('2'))
+            self.go('1 go 8')
+            self.test(msg.message('10'))
+        elif step == 7:
+            self.go('1 history')
+            self.test(msg.message('3 8'))
+        elif step == 8:
+            self.go('0 start notfs')
+            self.test(msg.message('Program started with pid', 2))
+            self.go('2 send user00 "Hy you there"')
+            self.test(msg.ok())
+        elif step == 11:
+            self.go('0 start chat')
+            self.test(msg.message('Program started with pid', 3))
+            self.go('2 send user00 "test_msg1"')
+            self.test(msg.ok())
+            self.go('3 messages')
+            self.test(msg.message([]))
+        elif step == 12:
+            self.go('3 messages')
+            self.test(msg.message([{'login':'user00', 'message':'test_msg2'}]))
+            
 
     def scen_cant_login(self, step):
-        pass
+        if step == 0:
+            self.go('0 login user00 qq')
+            self.test(msg.fail())
 
