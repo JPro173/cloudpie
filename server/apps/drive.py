@@ -65,22 +65,22 @@ class DriveService:
 
     def p_readj(self, path):
         data = json.load(
-            open(self.ppath(path))
+            open(self.ppath(path, check_exists=False))
         )
         return data
 
     def p_writej(self, path, data):
         return json.dump(
             data,
-            open(self.ppath(path), 'w+')
+            open(self.ppath(path, check_exists=False), 'w+')
         )
 
-    def p_appendj(self, path, data):
+    def p_appendj(self, path, value, key=''):
         data_curr = self.p_readj(path)
         if isinstance(data_curr, dict):
-            data_curr[data[0]] = data[1]
+            data_curr[key] = value
         elif isinstance(data_curr, list):
-            data_curr.append(data)
+            data_curr.append(value)
         else:
             raise DriveError('Can\'t append to JSON file {}'.format(path))
         self.p_writej(path, data_curr)

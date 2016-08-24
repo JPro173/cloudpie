@@ -1,0 +1,1 @@
+{"logins": ["user01", "user00"], "messages": [{"message": "test_msg1", "read": [], "login": "user01"}, {"message": "test_msg2", "read": [], "login": "user00"}]}

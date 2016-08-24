@@ -43,7 +43,11 @@ class FakeClient(Client):
             )
 
     def step(self, i):
-        self.scenf(i)
+        try:
+            self.scenf(i)
+        except:
+            print("{}: {}".format(self.scen, i))
+            raise
 
 
     def scen_user00(self, step):
@@ -53,10 +57,7 @@ class FakeClient(Client):
             self.test(msg.error('You need to log in'))
         elif step == 1:
             #test success login
-            self.go('0 login {} {}'.format(
-                'user00',
-                'qqq'
-            ))
+            self.go('0 login user00 qqq')
             self.test(msg.ok())
         elif step == 2:
             #test success app start
@@ -86,9 +87,11 @@ class FakeClient(Client):
         elif step == 10:
             self.go('0 start chat')
         elif step == 12:
-            self.go('3 messages')
-            self.test(msg.message([{'login':'user01', 'message':'test_msg1'}]))
-            self.test(msg.message([]))
+            self.go('2 unread')
+            self.test(msg.preaty([{'login':'user01', 'message':'test_msg1'}]))
+        elif step == 13:
+            self.go('2 send user01 "test_msg2"')
+            self.test(msg.ok())
 
 
     def scen_user01(self, step):
@@ -119,14 +122,16 @@ class FakeClient(Client):
         elif step == 11:
             self.go('0 start chat')
             self.test(msg.message('Program started with pid', 3))
-            self.go('2 send user00 "test_msg1"')
+            self.go('3 new user00')
             self.test(msg.ok())
-            self.go('3 messages')
+            self.go('3 send user00 "test_msg1"')
+            self.test(msg.ok())
+            self.go('3 unread')
             self.test(msg.message([]))
-        elif step == 12:
-            self.go('3 messages')
-            self.test(msg.message([{'login':'user00', 'message':'test_msg2'}]))
-            
+        elif step == 14:
+            self.go('3 unread')
+            self.test(msg.preaty([{'login':'user00', 'message':'test_msg2'}]))
+
 
     def scen_cant_login(self, step):
         if step == 0:
