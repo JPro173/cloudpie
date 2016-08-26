@@ -125,6 +125,8 @@ class BakedDrive(DriveService):
         self.path_postfix = path_postfix
 
     def ppath(self, path, check_exists=True):
+        if path[0] == '/':
+            path = path[1:]
         path = os.path.join(
             self.path_prefix,
             path,

@@ -59,8 +59,11 @@ class Client:
         if func is None:
             return msg.dont_exists_error(command=command)
         try:
-            args.append(self)
-            return func(*args)
+            return func(*args, _=None)
+        except TypeError:
+            pass
+        try:
+            return func(*args, user=self)
         except TypeError:
             raise
             return msg.args_count_error(got=len(args)-1)
