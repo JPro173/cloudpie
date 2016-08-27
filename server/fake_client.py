@@ -27,10 +27,11 @@ class FakeClient(Client):
     def prepare_drive(self):
         account = services.account.get(self.username)
         drive = account.drive
-        drive.writej('appdata/chat/chats', {})
-        drive.writej('appdata/notes/notes', [])
-        drive.writej('sys/invitations', [])
-        drive.writej('sys/notifcations', [])
+        drive.writej('/appdata/chat/chats', {})
+        drive.writej('/appdata/notes/notes', [])
+        drive.writej('/sys/invitations', [])
+        drive.writej('/sys/notifcations', [])
+        drive.clean('/fs/')
 
 
     def send(self, data):
@@ -129,8 +130,6 @@ class FakeClient(Client):
             self.go('0 invite user01 3 1')
             self.test(msg.ok())
 
-
-
     def scen_user01(self, step):
         if step == 0:
             #test success login
@@ -188,6 +187,38 @@ class FakeClient(Client):
             self.test(msg.ok())
             self.go('4 notes')
             self.test(msg.preaty([{'tag': 'film', 'id': 0, 'text': 'Hello world4'}]), js=True)
+
+    def scen_user02_drive(self, step):
+        if step == 0:
+            #test success login
+            self.go('0 login user02 qqq')
+            self.test(msg.ok())
+            self.prepare_drive()
+        elif step == 1:
+            self.go('0 start drive')
+            self.test(msg.message('Program started with pid', 1))
+        elif step == 2:
+            self.go('1 touch "./file1"')
+            self.go('1 touch "file2"')
+            self.test(msg.ok())
+            self.go('1 ls')
+            self.test(msg.preaty(['file1', 'file2']), js=True)
+        elif step == 3:
+            self.go('1 rm "./file2"')
+            self.test(msg.ok())
+            self.go('1 ls')
+            self.test(msg.preaty(['file1']), js=True)
+        elif step == 4:
+            self.go('1 mv file1 file3')
+            self.test(msg.ok())
+            self.go('1 ls')
+            self.test(msg.preaty(['file3']), js=True)
+        elif step == 5:
+            self.go('1 cp file3 file4')
+            self.test(msg.ok())
+            self.go('1 ls')
+            self.test(msg.preaty(['file3', 'file4']), js=True)
+
 
 
 

@@ -1,7 +1,51 @@
 import os.path
+import shutil
+import msg
 import hmac
 import hashlib
 import json
+
+from service import services
+
+
+class Drive:
+    def __init__(self, root_user):
+        self.root_user = root_user
+
+    def p_ls(self, path='', user=None):
+        path = os.path.join('fs', path)
+        drive = services.account.get(self.root_user.username).drive
+        return msg.preaty(drive.list_dir(path))
+
+    def p_touch(self, path, user):
+        path = os.path.join('fs', path)
+        drive = services.account.get(self.root_user.username).drive
+        if drive.exists(path):
+            return msg.fail()
+        if not drive.exists(os.path.dirname(path)):
+            drive.makedirs(os.path.dirname(path))
+        drive.write(path, '')
+        return msg.ok()
+
+    def p_cp(self, path1, path2, user):
+        path1 = os.path.join('fs', path1)
+        path2 = os.path.join('fs', path2)
+        drive = services.account.get(self.root_user.username).drive
+        if drive.copy(path1, path2):
+            return msg.ok()
+
+    def p_rm(self, path, user):
+        path = os.path.join('fs', path)
+        drive = services.account.get(self.root_user.username).drive
+        drive.remove(path)
+        return msg.ok()
+
+    def p_mv(self, path1, path2, user):
+        path1 = os.path.join('fs', path1)
+        path2 = os.path.join('fs', path2)
+        drive = services.account.get(self.root_user.username).drive
+        drive.move(path1, path2)
+        return msg.ok()
 
 
 class PathError(Exception):
@@ -85,6 +129,40 @@ class DriveService:
             raise DriveError('Can\'t append to JSON file {}'.format(path))
         self.p_writej(path, data_curr)
 
+    def p_clean(self, path):
+        path = self.ppath(path)
+        shutil.rmtree(path)
+        return os.makedirs(path)
+
+    def p_makedirs(self, path):
+        return os.makedirs(self.ppath(path, check_exists=False))
+
+    def p_remove(self, path):
+        path = self.ppath(path)
+        if os.path.isdir(path):
+            return shutil.rmtree(path)
+        else:
+            return os.remove(path)
+
+    def p_copy(self, path1, path2):
+        if self.p_exists(path2):
+            return False
+        path1 = self.ppath(path1)
+        path2 = self.ppath(path2, check_exists=False)
+        #if not self.p_exists(os.path.dirname(path2)):
+        #    self.p_makedirs(os.path.dirname(path2))
+        if os.path.isdir(path1):
+            shutil.copytree(path1, path2)
+        else:
+            shutil.copy(path1, path2)
+        return True
+
+    def p_move(self, path1, path2):
+        shutil.move(
+            self.ppath(path1),
+            self.ppath(path2, check_exists=False)
+        )
+
 
 class SharedDrive(DriveService):
     def __init__(self):
@@ -135,5 +213,7 @@ class BakedDrive(DriveService):
         return self.drive.ppath(path, check_exists)
 
     def __getattr__(self, name):
-        return getattr(self, 'p_'+name)
+        if hasattr(self, 'p_'+name):
+            return getattr(self, 'p_'+name)
+        raise AttributeError()
 

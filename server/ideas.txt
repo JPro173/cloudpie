@@ -1,5 +1,6 @@
-1. services.drive.shared.<app_name>.open|write...
-2. Drive.__init__(prepare_path_func=prepare_func)
-   Drive.share = SharedDrive(prapare_path_func=shared_prepare_func)
-3. services.session.get(sid) and services.user.get(login)
-4. Complex notifications {loaded_from_drive(user), local(session)}
+-1. services.drive.shared.<app_name>.open|write...
++2. Drive.__init__(prepare_path_func=prepare_func)
+    Drive.share = SharedDrive(prapare_path_func=shared_prepare_func)
++3. services.account.get(login) and services.user.get(uid)
++4. Complex notifications {loaded_from_drive(user), user(session), local(apps)}
+-5. DEBUG variable; if DEBUG: raise

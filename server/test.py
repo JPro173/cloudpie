@@ -18,7 +18,8 @@ class Server:
         tests(
             'user00',
             'user01',
-            'cant_login'
+            'user02_drive',
+            'cant_login',
         )
         print('Tests passed')
 
