@@ -15,9 +15,9 @@ class Users:
         except Exception as es:
             print(str(es))
 
-    def p_connect(self, *args):
+    def p_connect(self, *args, user=None):
         try:
-            services.users.connect(*args)
+            services.users.connect(*args, user)
             return msg.ok()
         except:
             raise

@@ -1,1 +1,1 @@
-{"messages": [{"read": [], "message": "test_msg1", "login": "user01"}, {"read": [], "message": "test_msg2", "login": "user00"}], "logins": ["user01", "user00"]}
+{"logins": ["user01", "user00"], "messages": [{"read": [], "message": "Hello, user00!", "login": "user01"}, {"read": [], "message": "Go", "login": "user00"}]}
