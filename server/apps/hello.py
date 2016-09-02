@@ -21,12 +21,24 @@ class Hello:
         try:
             self.clients[user.uid].append(int(n))
             self.a += int(n)
-            return msg.message(self.a)
+            return msg.message('put@val#'+str(self.a))
+            #return msg.message(self.a)
         except:
+            raise
             return msg.cast_error(0, int)
 
     def p_history(self, user):
         return msg.message(services.mathe.join(self.clients[user.uid], ' '))
+
+    def p_add(self, number, user):
+        try:
+            self.clients[user.uid].append(int(number))
+            self.a += int(number)
+            return msg.message('put@val#'+self.a)
+        except:
+            return msg.cast_error(0, int)
+
+
 
     def is_allowed_to_connect(self, permission):
         return True

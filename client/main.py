@@ -1,78 +1,59 @@
-import json
+import htmlPy
 import socket
-
-import kivy
-kivy.require('1.0.7')
-
-from kivy.app import App
-from kivy.uix.button import Button
-from kivy.uix.label import Label
-from kivy.uix.widget import Widget
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.textinput import TextInput
+import json
+import os
 
 
 sock = socket.socket()
 sock.connect(('localhost', 5002))
-
 sock.send(b'')
 sock.recv(1024)
 sock.recv(1024)
 sock.recv(1024)
 
-input_field = None
-summary_lbl = None
-history_lbl = None
+app = htmlPy.AppGUI(title=u"Python Best Ever", maximized=True)
 
-def my_event():
-    try:
-        value = int(input_field.text)
-        sock.send(b'2 go {}'.format(value))
-        data = sock.recv(1024).encode('utf-8')
-        summary_lbl.text = 'Summary: '+json.loads(data)['message']
-        sock.send(b'2 history')
-        data = sock.recv(1024).encode('utf-8')
-        history_lbl.text = 'History: '+json.loads(data)['message']
-        input_field.background_color = (1, 1, 1, 1)
-    except:
-        input_field.background_color = (1, 0, 0, 1)
+app.template_path = os.path.abspath("./html")
+app.static_path = os.path.abspath("./html")
+
+template_name = 'index.html'
+
+app_data = {
+    'val': '0'
+}
+
+def processor(response):
+    response = str(response)
+    response = json.loads(response)['message']
+    print(response)
+    command, data = response.split('#')
+    if '@' in command:
+        command, subcommand = command.split('@')
+    if command == 'put':
+        app_data[subcommand] = data
 
 
-class Form(BoxLayout):
+class App(htmlPy.Object):
     def __init__(self):
-        global input_field
-        BoxLayout.__init__(self)
-        self.spacing = 2
-        self.size_hint = (1, None)
-        self.size = (0, 50)
-        self.pos_hint = {'y': 0.9}
-        submit_button = Button(text='Send')
-        submit_button.on_press = my_event
-        submit_button.size_hint = (None, None)
-        submit_button.size = (100, 50)
-        input_field = TextInput(text='0')
-        self.add_widget(submit_button)
-        self.add_widget(input_field)
+        super(App, self).__init__()
+
+    @htmlPy.Slot(str)
+    def link(self, url):
+        template_name = str(url)
+        app.template = (template_name, app_data)
+
+    @htmlPy.Slot(str)
+    def command(self, cmd):
+        cmd = bytes(cmd)
+        sock.send(cmd)
+        response = sock.recv(1024)
+        processor(response)
+        app.template = (template_name, app_data)
 
 
-class TestApp(App):
-    def build(self):
-        global summary_lbl, history_lbl
-        root = BoxLayout(spacing=3, orientation='vertical')
-        root.add_widget(Form())
-        history_lbl = Label(text='History:', halign="left", valign="top")
-        history_lbl.bind(size=history_lbl.setter('text_size'))
-        summary_lbl = Label(text='Summary: 0', halign="left", valign="top")
-        summary_lbl.bind(size=summary_lbl.setter('text_size'))
-        summary_lbl.size_hint = (1, None)
-        summary_lbl.size = (0, 50)
-        root.add_widget(summary_lbl)
-        root.add_widget(history_lbl)
-        root.add_widget(Widggg())
-        return root
+app.template = (template_name, app_data)
 
-class Widggg(Widget):
-    pass
+app.bind(App())
 
-app = TestApp()
-app.run()
+app.start()
+
